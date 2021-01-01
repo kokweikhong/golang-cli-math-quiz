@@ -112,6 +112,8 @@ func main() {
 		}
 
 		fmt.Printf(strings.Repeat("-", 10)+" You have selected `%v` with `%v` level "+strings.Repeat("-", 10)+"\n", mathChoice, difChoice)
+		fmt.Println()
+		fmt.Println()
 
 		// Create the questions based on math and level selection
 		var correct int = 0
