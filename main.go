@@ -41,108 +41,133 @@ func main() {
 	flag.IntVar(&defaultNumofQuestions, "numq", defaultNumofQuestions, "How many questions you want to challenge, default is 20")
 	flag.IntVar(&timeLimit, "time", timeLimit, "-Time limit per question\n-if you don't want to set a limit, just put 0, default is 5 secs per question")
 	flag.Parse()
-	if mathChoiceInt > 4 || mathChoiceInt < 1 || difChoiceInt > 4 || difChoiceInt < 1 || defaultNumofQuestions < 1 {
-		fmt.Println(strings.Repeat("*", 60))
-		fmt.Println("Mathematics Challenge Quiz (Train Your Calculation Speed)")
-		fmt.Println(strings.Repeat("*", 60))
-		fmt.Println(strings.Repeat("#", 15) + " Please Choose Below Category " + strings.Repeat("#", 15))
+	for {
+		if mathChoiceInt > 4 || mathChoiceInt < 1 || difChoiceInt > 4 || difChoiceInt < 1 || defaultNumofQuestions < 1 {
+			fmt.Println(strings.Repeat("*", 60))
+			fmt.Println("Mathematics Challenge Quiz (Train Your Calculation Speed)")
+			fmt.Println(strings.Repeat("*", 60))
+			fmt.Println(strings.Repeat("#", 15) + " Please Choose Below Category " + strings.Repeat("#", 15))
 
-		// Display mathematics quiz menu list
-		for k, v := range mathMenu {
-			fmt.Printf("%d) %v\n", k+1, v)
-		}
-		for {
-			fmt.Printf("Select Your Mathematics Choice: ")
-			input.Scan()
-			if input.Text() == "" {
-				fmt.Printf("error: selection can't be blank.\n")
-				continue
+			// Display mathematics quiz menu list
+			for k, v := range mathMenu {
+				fmt.Printf("%d) %v\n", k+1, v)
 			}
-			inputVal, _ = strconv.Atoi(input.Text())
-			if inputVal == 0 || inputVal > 4 {
-				fmt.Printf("err: please input a valid number from 1 to 4.\n")
-				continue
+			for {
+				fmt.Printf("Select Your Mathematics Choice: ")
+				input.Scan()
+				if input.Text() == "" {
+					fmt.Printf("error: selection can't be blank.\n")
+					continue
+				}
+				inputVal, _ = strconv.Atoi(input.Text())
+				if inputVal == 0 || inputVal > 4 {
+					fmt.Printf("err: please input a valid number from 1 to 4.\n")
+					continue
+				}
+				mathChoice = mathMenu[inputVal-1]
+				break
 			}
-			mathChoice = mathMenu[inputVal-1]
-			break
+
+			// Select the math quiz difficulty level
+			fmt.Println(strings.Repeat("#", 15)+" Please Select The Difficulty", strings.Repeat("#", 15))
+
+			for k, v := range difList {
+				fmt.Printf("%d) %v\n", k+1, v)
+			}
+			for {
+				fmt.Printf("Select Your Difficulty Choice: ")
+				input.Scan()
+				if input.Text() == "" {
+					fmt.Printf("error: selection can't be blank.\n")
+					continue
+				}
+				inputVal, _ = strconv.Atoi(input.Text())
+				if inputVal == 0 || inputVal > 4 {
+					fmt.Printf("err: please input a valid number from 1 to 4.\n")
+					continue
+				}
+				difChoice = difList[inputVal-1]
+				break
+			}
+		} else {
+			mathChoice = mathMenu[mathChoiceInt-1]
+			difChoice = difList[difChoiceInt-1]
 		}
 
-		// Select the math quiz difficulty level
-		fmt.Println(strings.Repeat("#", 15)+" Please Select The Difficulty", strings.Repeat("#", 15))
-
-		for k, v := range difList {
-			fmt.Printf("%d) %v\n", k+1, v)
+		fmt.Printf(strings.Repeat("-", 10)+" You have selected `%v` with `%v` level "+strings.Repeat("-", 10)+"\n", mathChoice, difChoice)
+		// var
+		var correct int = 0
+		switch mathChoice {
+		case "Addition":
+			symbolMath = "+"
+			mathquestionlist = addition(difChoice, defaultNumofQuestions)
+		case "Subtraction":
+			symbolMath = "-"
+			mathquestionlist = subtraction(difChoice, defaultNumofQuestions)
+		case "Multiplication":
+			symbolMath = "*"
+			mathquestionlist = multiplicationdivision(mathChoice, difChoice, defaultNumofQuestions)
+		case "Division":
+			symbolMath = "/"
+			mathquestionlist = multiplicationdivision(mathChoice, difChoice, defaultNumofQuestions)
 		}
-		for {
-			fmt.Printf("Select Your Difficulty Choice: ")
-			input.Scan()
-			if input.Text() == "" {
-				fmt.Printf("error: selection can't be blank.\n")
-				continue
+		timeperQ := timeLimit * defaultNumofQuestions
+		timer := time.NewTimer(time.Duration(timeperQ) * time.Second)
+	problemloop:
+		for k, v := range mathquestionlist {
+			answerCH := make(chan string)
+			fmt.Printf("Question #%d : %v %v %v = ", k+1, v.question.number1, symbolMath, v.question.number2)
+
+			go func() {
+				input.Scan()
+				answerCH <- input.Text()
+			}()
+			select {
+			case <-timer.C:
+				fmt.Printf("timeout: you have reached the time limit to answer questions.\n")
+				break problemloop
+			case <-answerCH:
+				if input.Text() == "" {
+					fmt.Println("you have skip the question, continue to next question.")
+					fmt.Println(strings.Repeat("<>", 30))
+					continue
+				}
+				inputVal, _ = strconv.Atoi(input.Text())
+				if inputVal == v.answer {
+					fmt.Printf("your answer %v is correct\n", inputVal)
+					fmt.Println(strings.Repeat("<>", 30))
+					correct++
+				} else {
+					fmt.Printf("your answer is `%v` incorrect, the correct answer is %v\n", inputVal, v.answer)
+					fmt.Println(strings.Repeat("<>", 30))
+				}
 			}
-			inputVal, _ = strconv.Atoi(input.Text())
-			if inputVal == 0 || inputVal > 4 {
-				fmt.Printf("err: please input a valid number from 1 to 4.\n")
-				continue
-			}
-			difChoice = difList[inputVal-1]
-			break
+
 		}
-	} else {
-		mathChoice = mathMenu[mathChoiceInt-1]
-		difChoice = difList[difChoiceInt-1]
-	}
-
-	fmt.Printf(strings.Repeat("-", 10)+" You have selected `%v` with `%v` level "+strings.Repeat("-", 10)+"\n", mathChoice, difChoice)
-	// var
-	var correct int = 0
-	switch mathChoice {
-	case "Addition":
-		symbolMath = "+"
-		mathquestionlist = addition(difChoice, defaultNumofQuestions)
-	case "Subtraction":
-		symbolMath = "-"
-		mathquestionlist = subtraction(difChoice, defaultNumofQuestions)
-	case "Multiplication":
-		symbolMath = "*"
-		mathquestionlist = multiplicationdivision(mathChoice, difChoice, defaultNumofQuestions)
-	case "Division":
-		symbolMath = "/"
-		mathquestionlist = multiplicationdivision(mathChoice, difChoice, defaultNumofQuestions)
-	}
-	timeperQ := timeLimit * defaultNumofQuestions
-	timer := time.NewTimer(time.Duration(timeperQ) * time.Second)
-problemloop:
-	for k, v := range mathquestionlist {
-		answerCH := make(chan string)
-		fmt.Printf("Question #%d : %v %v %v = ", k+1, v.question.number1, symbolMath, v.question.number2)
-
+		fmt.Println(strings.Repeat("+", 50))
+		fmt.Printf("Results: you have scored %v out of %v\n", correct, len(mathquestionlist))
+		fmt.Printf("You have completed the quiz.\n")
+		fmt.Printf(strings.Repeat("-", 50) + "\n")
+		fmt.Printf("Press Enter to Continue or Enter 1 to Exit\n")
+		fmt.Printf("or program will exit in 3 seconds\n")
+		fmt.Printf("Please Press Enter or 1: ")
+		exitTimer := time.NewTimer(time.Duration(3) * time.Second)
+		exitCh := make(chan string)
 		go func() {
 			input.Scan()
-			answerCH <- input.Text()
+			exitCh <- input.Text()
 		}()
 		select {
-		case <-timer.C:
-			fmt.Printf("timeout: you have reached the time limit to answer questions.\n")
-			break problemloop
-		case <-answerCH:
-			if input.Text() == "" {
-				fmt.Println("you have skip the question, continue to next question.")
-				continue
-			}
-			inputVal, _ = strconv.Atoi(input.Text())
-			if inputVal == v.answer {
-				fmt.Printf("your answer %v is correct\n", inputVal)
-				correct++
-			} else {
-				fmt.Printf("your answer is `%v` incorrect, the correct answer is %v\n", inputVal, v.answer)
+		case <-exitTimer.C:
+			return
+		case exitStr := <-exitCh:
+			if exitStr == "" {
+				break
+			} else if exitStr == "1" {
+				return
 			}
 		}
-
 	}
-	fmt.Println(strings.Repeat("+", 50))
-	fmt.Printf("Results: you have scored %v out of %v\n", correct, len(mathquestionlist))
-	fmt.Printf("You have completed the quiz.\n")
 }
 
 func addition(level string, defaultNumQ int) []*mathematicsQuiz {
