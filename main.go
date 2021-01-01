@@ -178,7 +178,7 @@ func main() {
 		fmt.Printf("Please Press Enter or 1: ")
 
 		// Set the time limit for decision for continue or quit
-		exitTimer := time.NewTimer(time.Duration(3) * time.Second)
+		exitTimer := time.NewTimer(time.Duration(10) * time.Second)
 		exitCh := make(chan string)
 		go func() {
 			input.Scan()
