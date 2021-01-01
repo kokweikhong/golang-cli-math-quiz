@@ -151,17 +151,23 @@ func main() {
 			case <-answerCH:
 				if input.Text() == "" {
 					fmt.Println("you have skip the question, continue to next question.")
+					fmt.Println()
 					fmt.Println(strings.Repeat("<>", 30))
+					fmt.Println()
 					continue
 				}
 				inputVal, _ = strconv.Atoi(input.Text())
 				if inputVal == v.answer {
 					fmt.Printf("your answer %v is correct\n", inputVal)
+					fmt.Println()
 					fmt.Println(strings.Repeat("<>", 30))
+					fmt.Println()
 					correct++
 				} else {
 					fmt.Printf("your answer is `%v` incorrect, the correct answer is %v\n", inputVal, v.answer)
+					fmt.Println()
 					fmt.Println(strings.Repeat("<>", 30))
+					fmt.Println()
 				}
 			}
 		}
@@ -174,7 +180,7 @@ func main() {
 
 		// To continue the quiz or quit
 		fmt.Printf("Press Enter to Continue or Enter 1 to Exit\n")
-		fmt.Printf("or program will exit in 3 seconds\n")
+		fmt.Printf("or program will exit in 10 seconds\n")
 		fmt.Printf("Please Press Enter or 1: ")
 
 		// Set the time limit for decision for continue or quit
