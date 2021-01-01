@@ -41,9 +41,6 @@ func main() {
 	flag.IntVar(&defaultNumofQuestions, "numq", defaultNumofQuestions, "How many questions you want to challenge, default is 20")
 	flag.IntVar(&timeLimit, "time", timeLimit, "-Time limit per question\n-if you don't want to set a limit, just put 0, default is 5 secs per question")
 	flag.Parse()
-	fmt.Println(defaultNumofQuestions)
-	fmt.Println(difChoiceInt)
-	fmt.Println(mathChoiceInt)
 	if mathChoiceInt > 4 || mathChoiceInt < 1 || difChoiceInt > 4 || difChoiceInt < 1 || defaultNumofQuestions < 1 {
 		fmt.Println(strings.Repeat("*", 60))
 		fmt.Println("Mathematics Challenge Quiz (Train Your Calculation Speed)")
@@ -197,7 +194,6 @@ func subtraction(level string, defaultNumQ int) []*mathematicsQuiz {
 		for {
 			subQuesList[i].question.number1 = rand.Intn(maxnum)
 			subQuesList[i].question.number2 = rand.Intn(maxnum)
-			fmt.Println(subQuesList[i].question.number1)
 			if subQuesList[i].question.number1 <= 1 {
 				continue
 			} else {
@@ -212,7 +208,6 @@ func subtraction(level string, defaultNumQ int) []*mathematicsQuiz {
 				break
 			}
 		}
-		fmt.Println(subQuesList[i].question.number1)
 		subQuesList[i].answer = subQuesList[i].question.number1 - subQuesList[i].question.number2
 	}
 	return subQuesList
