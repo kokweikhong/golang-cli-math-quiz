@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Question and answer data structure
 type mathematicsQuiz struct {
 	question struct {
 		number1 int
@@ -34,24 +35,37 @@ var (
 	timeLimit             int = 5
 )
 
-// "Beginner", "Intermediate", "Advanced", "Expert"
 func main() {
+	// Cli config
+	// math = choose category - 1.Addition 2.Subtraction 3.Multiplication 4.Division
+	// level = choose level - 1.Beginner 2.Intermediate 3.Advanced 4.Expert
+	// math and level is compulsory to choose when using cli command
+	// numq and time is alternatively, can be set or not
+	// numq = number of questions (default is 20), time = time limit for each question (default is 5s)
+	// example: ./golang-cli-math-quiz -math=(1-4) -level=(1-4) -numq=(1-n) -time=(1-n)
 	flag.IntVar(&mathChoiceInt, "math", 0, "Mathematics Choice\n1) Addition \n2) Subtraction\n3) Multiplication\n4) Division")
 	flag.IntVar(&difChoiceInt, "level", 0, "Level Choice\n1) Beginner\n2) Intermediate\n3) Advanced\n4) Expert")
 	flag.IntVar(&defaultNumofQuestions, "numq", defaultNumofQuestions, "How many questions you want to challenge, default is 20")
 	flag.IntVar(&timeLimit, "time", timeLimit, "-Time limit per question\n-if you don't want to set a limit, just put 0, default is 5 secs per question")
 	flag.Parse()
+
+	// Looping for user can continue do the challenge
 	for {
+		// if the cli command input not within the criteria will jump to manual selection
+		// math and level is compulsory to input together
 		if mathChoiceInt > 4 || mathChoiceInt < 1 || difChoiceInt > 4 || difChoiceInt < 1 || defaultNumofQuestions < 1 {
 			fmt.Println(strings.Repeat("*", 60))
 			fmt.Println("Mathematics Challenge Quiz (Train Your Calculation Speed)")
 			fmt.Println(strings.Repeat("*", 60))
 			fmt.Println(strings.Repeat("#", 15) + " Please Choose Below Category " + strings.Repeat("#", 15))
 
-			// Display mathematics quiz menu list
+			// Manual selection for mathematics and level
 			for k, v := range mathMenu {
 				fmt.Printf("%d) %v\n", k+1, v)
 			}
+
+			// Looping for mathematics choices, the criteria input is 1-4, other than the criteria /
+			// will keep looping until get the correct selection
 			for {
 				fmt.Printf("Select Your Mathematics Choice: ")
 				input.Scan()
@@ -74,6 +88,9 @@ func main() {
 			for k, v := range difList {
 				fmt.Printf("%d) %v\n", k+1, v)
 			}
+
+			// Looping for level selection, the criteria input is 1-4,
+			// if other than criteria will keep looping until get the correct selection
 			for {
 				fmt.Printf("Select Your Difficulty Choice: ")
 				input.Scan()
@@ -95,7 +112,8 @@ func main() {
 		}
 
 		fmt.Printf(strings.Repeat("-", 10)+" You have selected `%v` with `%v` level "+strings.Repeat("-", 10)+"\n", mathChoice, difChoice)
-		// var
+
+		// Create the questions based on math and level selection
 		var correct int = 0
 		switch mathChoice {
 		case "Addition":
@@ -111,8 +129,12 @@ func main() {
 			symbolMath = "/"
 			mathquestionlist = multiplicationdivision(mathChoice, difChoice, defaultNumofQuestions)
 		}
+
+		// Set the time limit for total question = time for each question * total questions
 		timeperQ := timeLimit * defaultNumofQuestions
 		timer := time.NewTimer(time.Duration(timeperQ) * time.Second)
+
+		// Looping for print out the questions
 	problemloop:
 		for k, v := range mathquestionlist {
 			answerCH := make(chan string)
@@ -142,15 +164,20 @@ func main() {
 					fmt.Println(strings.Repeat("<>", 30))
 				}
 			}
-
 		}
+
+		// Print out results
 		fmt.Println(strings.Repeat("+", 50))
 		fmt.Printf("Results: you have scored %v out of %v\n", correct, len(mathquestionlist))
 		fmt.Printf("You have completed the quiz.\n")
 		fmt.Printf(strings.Repeat("-", 50) + "\n")
+
+		// To continue the quiz or quit
 		fmt.Printf("Press Enter to Continue or Enter 1 to Exit\n")
 		fmt.Printf("or program will exit in 3 seconds\n")
 		fmt.Printf("Please Press Enter or 1: ")
+
+		// Set the time limit for decision for continue or quit
 		exitTimer := time.NewTimer(time.Duration(3) * time.Second)
 		exitCh := make(chan string)
 		go func() {
@@ -170,6 +197,8 @@ func main() {
 	}
 }
 
+// Addition function, create questions with answer
+// Criteria = based on level selected, n + n = 2n (n value will not exceeed the maximum number)
 func addition(level string, defaultNumQ int) []*mathematicsQuiz {
 	addQuesList := make([]*mathematicsQuiz, defaultNumQ)
 	var maxnum int
@@ -201,6 +230,8 @@ func addition(level string, defaultNumQ int) []*mathematicsQuiz {
 	return addQuesList
 }
 
+// Subtraction function, create questions with answer
+// criteria = based on level selected, x - y = n (y value will not greater than x and x will not exceed to the maximum number)
 func subtraction(level string, defaultNumQ int) []*mathematicsQuiz {
 	subQuesList := make([]*mathematicsQuiz, defaultNumQ)
 	var maxnum int
@@ -238,6 +269,10 @@ func subtraction(level string, defaultNumQ int) []*mathematicsQuiz {
 	return subQuesList
 }
 
+// Multiplication and Division function, create questions with answer
+// criteria = based on level selected, will create multiplication table to generate questions and answers
+// multiplication criteria = x * x = y (x will not exceed the end number)
+// division criteria = x / x = y (x will not exceed the end number)
 func multiplicationdivision(math, level string, defaultNumQ int) []*mathematicsQuiz {
 	var muldivQuesList = make([]*mathematicsQuiz, defaultNumQ)
 	var startnum, endnum int
@@ -296,6 +331,8 @@ func multiplicationdivision(math, level string, defaultNumQ int) []*mathematicsQ
 	return muldivQuesList
 }
 
+// Create multiplication table
+// Purpose is to easy to create multiplication and division questions and answers with less duplication Q&A
 func multiplicationTable(start, end int) []*mathematicsQuiz {
 	var multablelist []*mathematicsQuiz
 	for i := start; i <= end; i++ {
